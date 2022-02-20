@@ -18,7 +18,10 @@ const getMovies = async (req, res) => {
     axios.get(`http://omdbapi.com/?apikey=${process.env.API_KEY}&t=${title}`)
         .then(result => {
             res.cookie('session_id', DUMMY_SESSION_ID)
-            res.status(200).json({Poster: result.data.Poster})
+            res.status(200).json({
+                title: title,
+                poster: result.data.Poster
+            })
         })
         .catch(err => {
             res.status(500).json({
@@ -28,7 +31,7 @@ const getMovies = async (req, res) => {
           });
 }
 
-const getFavorites = (req, res) => {
+const getFavorites =(req, res) => {
 
     User.findOne({where: {user_id: req.body.user_id}})
         .then((user) => {
@@ -38,20 +41,29 @@ const getFavorites = (req, res) => {
                     message: "Please provide valid User ID"
                 });
             }
+        })
 
             Favorite_Movies.findAll({
                 where: {
                     user_id: req.body.user_id
                 }
             })
-            .then((movies) => {
-                
+            .then(async (movies) => {
+                const promises = movies.map(async (item) => {
+                    const result = await axios.get(`http://omdbapi.com/?apikey=${process.env.API_KEY}&t=${item.title}`)
+                    return {
+                        title: item.title,
+                        poster: result.data.Poster
+                    }
+                })
+                const favorites = await Promise.all(promises)
+                DUMMY_SESSION_ID = Math.random().toString(21).slice(2)
+                res.cookie('session_id', DUMMY_SESSION_ID)
                 res.status(200).json({
                     result: "SUCCESS",
-                    message: movies
+                    message: favorites
                 })
             })
-        })
     .catch((err) => {
         res.status(500).json({
             result: "FAILED",
