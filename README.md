@@ -58,6 +58,6 @@ To test the JSON Web Token verification system, follow these steps:
 
 |      Key      |         Value          |
 | :-----------: | :--------------------: |
-| Authorization | Bearer **token value** |
+| Authorization | Bearer **token_value** |
 
 3. Use these steps to make request with other endpoint.
