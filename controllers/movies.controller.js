@@ -1,31 +1,24 @@
 require('dotenv').config()
 const axios = require('axios');
-const {Favorite_Movies} = require('../models')
+const {Favorite_Movies, User} = require('../models')
 
-const getAllMovies = (req, res) => {
-    try {
+
+const getMovies = async (req, res) => {
+    if (!req.query.title){
         res.status(403).json({
             result: "FORBIDDEN",
             message: "This page is forbidden"
-        })
+        });
+        return;
     }
-    catch(err) {
-        res.status(500).json({
-            result: "FAILED",
-            message: err.message || "Internal server error"
-        })
-    }
-}
 
-const getOneMovie = async (req, res) => {
-    const title = req.params.title
+    const title = req.query.title
+    DUMMY_SESSION_ID = Math.random().toString(21).slice(2)
 
     axios.get(`http://omdbapi.com/?apikey=${process.env.API_KEY}&t=${title}`)
         .then(result => {
-            res.status(200).json({
-                result: "SUCCESS",
-                message: result.data.Poster
-            })
+            res.cookie('session_id', DUMMY_SESSION_ID)
+            res.status(200).json({Poster: result.data.Poster})
         })
         .catch(err => {
             res.status(500).json({
@@ -37,25 +30,34 @@ const getOneMovie = async (req, res) => {
 
 const getFavorites = (req, res) => {
 
-    userId = req.body.user_id
+    User.findOne({where: {user_id: req.body.user_id}})
+        .then((user) => {
+            if (user === null){
+                return res.status(400).json({
+                    result: "FAILED",
+                    message: "Please provide valid User ID"
+                });
+            }
 
-    Favorite_Movies.findAll({
-        where: {
-            user_id: userId
-        }
-    })
-    .then((movies) => {
-        res.status(200).json({
-            result: "SUCCESS",
-            message: movies
+            Favorite_Movies.findAll({
+                where: {
+                    user_id: req.body.user_id
+                }
+            })
+            .then((movies) => {
+                res.status(200).json({
+                    result: "SUCCESS",
+                    message: movies
+                })
+            })
         })
-    })
     .catch((err) => {
         res.status(500).json({
             result: "FAILED",
             message: err.message || 'Internal server error'
         })
     });
+    
 };
 
 const addFavorites = (req, res) => {
@@ -63,21 +65,31 @@ const addFavorites = (req, res) => {
     if (!req.body.title || !req.body.user_id){
         res.status(400).json({
             result: "FAILED",
-            message: "Please provide Mvoie Title and User ID"
+            message: "Please provide Movie Title and User ID"
         });
         return;
     }    
 
-    const newFav = {
-        title: req.body.title,
-        user_id: req.body.user_id
-    }
-    Favorite_Movies.create(newFav)
-        .then( () => {
-            res.status(201).json({
-                result: "SUCCESS",
-                message: `Added ${req.body.title} as ${req.body.user_id}'s favorite`
-            })
+    User.findOne({where: {user_id: req.body.user_id}})
+        .then((user) => {
+            if (user === null){
+                return res.status(400).json({
+                    result: "FAILED",
+                    message: "Please provide valid User ID"
+                });
+            }
+
+            const newFav = {
+                title: req.body.title,
+                user_id: req.body.user_id
+            }
+            Favorite_Movies.create(newFav)
+                .then( () => {
+                    res.status(201).json({
+                        result: "SUCCESS",
+                        message: `Added ${req.body.title} as ${req.body.user_id}'s favorite`
+                    })
+                })
         })
         .catch((err) => {
             res.status(500).json({
@@ -85,6 +97,7 @@ const addFavorites = (req, res) => {
                 message: err.message || "Internal server error"
             })
         })
+
 }
 
-module.exports = {getAllMovies, getOneMovie, getFavorites, addFavorites}
+module.exports = {getMovies, getFavorites, addFavorites}
