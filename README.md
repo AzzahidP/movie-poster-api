@@ -43,17 +43,21 @@ $ npm run dev
 
 ## API Documentation
 
-|         Route/URL          | Method | Butuh Autentikasi | Keterangan                               |
-| :------------------------: | :----: | ----------------- | ---------------------------------------- |
-|             /              |  get   | No                | landing Page                             |
-|          /signup           |  get   | NO                | signup Page                              |
-|          /signup           |  post  | NO                | to create new user                       |
-|           /login           |  get   | NO                | login page                               |
-|           /login           |  post  | NO                | to login with user                       |
-|           /game            |  get   | YES               | game page                                |
-|         /dashboard         |  get   | YES               | dashboard page to controll data of users |
-|   /dashboard/create-user   |  get   | YES               | create new user page                     |
-|   /dashboard/create-user   |  post  | YES               | to create new user                       |
-|  /dashboard/edit-user/:id  |  get   | YES               | edit user page                           |
-|  /dashboard/edit-user/:id  |  post  | YES               | to edit existing user                    |
-| /dashboard/delete-user/:id |  get   | YES               | to delete existing user                  |
+|            Route           | Method |    Request Body   |                 Description                   |
+| :------------------------: | :----: | ----------------- | --------------------------------------------- |
+|          /movies           |  GET   |         -         | Forbidden                                     |
+|     /movies/{movie title}  |  GET   |         -         | Returns movie poster url (JSON)               |
+|      /movies/favorite      |  GET   |     user_id       | Returns all favorite movies poster url (JSON) |
+|      /movies/favorite      |  POST  |  title; user_id   | Add user's favorite movies                    |
+|           /login           |  POST  |         -         | For testing purpose only                      |
+
+## Testing
+To test the JSON Web Token verification system, follow these steps:
+1. Hit <mark>/login</mark> endpoint and copy **token value** from response body.
+2. Use **token value** as Authorization value in request headers:
+```
+|      Key      |         Value          |
+| :-----------: | :--------------------: |
+| Authorization | Bearer **token value** |
+```
+3. Use these steps to make request with other endpoint.

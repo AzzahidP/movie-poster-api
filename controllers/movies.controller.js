@@ -45,6 +45,7 @@ const getFavorites = (req, res) => {
                 }
             })
             .then((movies) => {
+                
                 res.status(200).json({
                     result: "SUCCESS",
                     message: movies
