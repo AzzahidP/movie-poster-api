@@ -55,9 +55,9 @@ $ npm run dev
 To test the JSON Web Token verification system, follow these steps:
 1. Hit <mark>/login</mark> endpoint and copy **token value** from response body.
 2. Use **token value** as Authorization value in request headers:
-```
+
 |      Key      |         Value          |
 | :-----------: | :--------------------: |
 | Authorization | Bearer **token value** |
-```
+
 3. Use these steps to make request with other endpoint.
